@@ -1,53 +1,40 @@
 const path = require('path')
 const fs = require('fs').promises
-// const path = require('node:path');
 
 const main = async () => {
- try{
+  try {
     const listFile = await fs.readdir('music')
-    // console.log(listFile);
-    listFile.map((item) => {
+    listFile.forEach(async (item) => {
       const [artis, music] = item.split(" - ")
-      console.log('artis: '+ artis + ' musik: ' + music);
 
-      createFolder(artis)
-      moveFile(item, artis)
+      const folderPath = path.join('music', artis)
+      const oldPath = path.join('music', item)
+      const newPath = path.join(folderPath, item)
+
+      await createFolder(folderPath)
+      await moveFile(oldPath, newPath)
     })
- } catch(error){
-  console.log(error);
- }
+  } catch (error) {
+    console.error('Terjadi kesalahan:', error)
+  }
 }
 
-const moveFile = async (fileName, artisFolder) => {
-  try{
-    const sourcePath = path.join('music', fileName)
-    const direct = path.join(artisFolder, fileName)
-
-    await fs.rename(sourcePath, direct)
-    console.log(`File "${fileName}" berhasil dipindahkan ke folder "${artisFolder}"`)
-  }catch(err){
-    console.log(err);
-    
+const moveFile = async (oldPath, newPath) => {
+  try {
+    await fs.rename(oldPath, newPath)
+    console.log(`File berhasil dipindahkan ke ${newPath}`)
+  } catch (err) {
+    console.error(`Gagal memindahkan file dari ${oldPath} ke ${newPath}:`, err)
   }
 }
 
 const createFolder = async (folderName) => {
   try {
-    await fs.mkdir(folderName, { recursive: true });
-      console.log("folder berhasil dibuat");
+    await fs.mkdir(folderName, { recursive: true })
+    console.log(`Folder "${folderName}" berhasil dibuat`)
   } catch (err) {
-    console.error(err);
+    console.error(`Gagal membuat folder "${folderName}":`, err)
   }
 }
-
-// const createFile = async(fileName) => {
-//   try {
-//     const content = ""
-//     await fs.writeFile(fileName, content)
-//     console.log("Write File Succes");
-//   } catch (error) {
-//     console.log(error);
-//   }
-// }
 
 main()
